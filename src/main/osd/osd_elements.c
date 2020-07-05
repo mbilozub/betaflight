@@ -1260,6 +1260,13 @@ static void osdElementVtxChannel(osdElementParms_t *element)
 }
 #endif // USE_VTX_COMMON
 
+void storeWarningForDji(char *message)
+{
+	if (osdWarnDjiEnabled()) {
+		tfp_sprintf(pilotConfigMutable()->warning, "%s", message);
+	}
+}
+
 static void osdElementWarnings(osdElementParms_t *element)
 {
 #define OSD_WARNINGS_MAX_SIZE 12
@@ -1302,6 +1309,7 @@ static void osdElementWarnings(osdElementParms_t *element)
             }
 
             tfp_sprintf(element->buff, "%s", armingDisableFlagNames[armingDisabledDisplayIndex]);
+            storeWarningForDji(element->buff);
             element->attr = DISPLAYPORT_ATTR_WARNING;
             return;
         } else {
@@ -1320,12 +1328,14 @@ static void osdElementWarnings(osdElementParms_t *element)
         } else {
             tfp_sprintf(element->buff, "ARM IN %d.%d", armingDelayTime / 10, armingDelayTime % 10);
         }
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_INFO;
         return;
     }
 #endif // USE_DSHOT
     if (osdWarnGetState(OSD_WARNING_FAIL_SAFE) && failsafeIsActive()) {
         tfp_sprintf(element->buff, "FAIL SAFE");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_CRITICAL;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1334,6 +1344,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // Warn when in flip over after crash mode
     if (osdWarnGetState(OSD_WARNING_CRASH_FLIP) && isFlipOverAfterCrashActive()) {
         tfp_sprintf(element->buff, "CRASH FLIP");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_INFO;
         return;
     }
@@ -1356,6 +1367,8 @@ static void osdElementWarnings(osdElementParms_t *element)
             SET_BLINK(OSD_WARNINGS);
         }
 
+        storeWarningForDji(element->buff);
+
         element->attr = DISPLAYPORT_ATTR_INFO;
         return;
     }
@@ -1364,6 +1377,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // RSSI
     if (osdWarnGetState(OSD_WARNING_RSSI) && (getRssiPercent() < osdConfig()->rssi_alarm)) {
         tfp_sprintf(element->buff, "RSSI LOW");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1372,6 +1386,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // rssi dbm
     if (osdWarnGetState(OSD_WARNING_RSSI_DBM) && (getRssiDbm() < osdConfig()->rssi_dbm_alarm)) {
         tfp_sprintf(element->buff, "RSSI DBM");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1382,6 +1397,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // Link Quality
     if (osdWarnGetState(OSD_WARNING_LINK_QUALITY) && (rxGetLinkQualityPercent() < osdConfig()->link_quality_alarm)) {
         tfp_sprintf(element->buff, "LINK QUALITY");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1402,6 +1418,7 @@ static void osdElementWarnings(osdElementParms_t *element)
        !gpsRescueIsDisabled() &&
        !gpsRescueIsAvailable()) {
         tfp_sprintf(element->buff, "RESCUE N/A");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1415,6 +1432,7 @@ static void osdElementWarnings(osdElementParms_t *element)
         statistic_t *stats = osdGetStats();
         if (cmpTimeUs(stats->armed_time, OSD_GPS_RESCUE_DISABLED_WARNING_DURATION_US) < 0) {
             tfp_sprintf(element->buff, "RESCUE OFF");
+            storeWarningForDji(element->buff);
             element->attr = DISPLAYPORT_ATTR_WARNING;
             SET_BLINK(OSD_WARNINGS);
             return;
@@ -1426,6 +1444,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // Show warning if in HEADFREE flight mode
     if (FLIGHT_MODE(HEADFREE_MODE)) {
         tfp_sprintf(element->buff, "HEADFREE");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1435,6 +1454,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     const int16_t coreTemperature = getCoreTemperatureCelsius();
     if (osdWarnGetState(OSD_WARNING_CORE_TEMPERATURE) && coreTemperature >= osdConfig()->core_temp_alarm) {
         tfp_sprintf(element->buff, "CORE %c: %3d%c", SYM_TEMPERATURE, osdConvertTemperatureToSelectedUnit(coreTemperature), osdGetTemperatureSymbolForSelectedUnit());
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1487,6 +1507,7 @@ static void osdElementWarnings(osdElementParms_t *element)
 
         if (escWarningCount > 0) {
             tfp_sprintf(element->buff, "%s", escWarningMsg);
+            storeWarningForDji(element->buff);
             element->attr = DISPLAYPORT_ATTR_WARNING;
             SET_BLINK(OSD_WARNINGS);
             return;
@@ -1496,6 +1517,7 @@ static void osdElementWarnings(osdElementParms_t *element)
 
     if (osdWarnGetState(OSD_WARNING_BATTERY_WARNING) && batteryState == BATTERY_WARNING) {
         tfp_sprintf(element->buff, "LOW BATTERY");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1505,6 +1527,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // Show warning if rc smoothing hasn't initialized the filters
     if (osdWarnGetState(OSD_WARNING_RC_SMOOTHING) && ARMING_FLAG(ARMED) && !rcSmoothingInitializationComplete()) {
         tfp_sprintf(element->buff, "RCSMOOTHING");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1514,6 +1537,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // Show warning if mah consumed is over the configured limit
     if (osdWarnGetState(OSD_WARNING_OVER_CAP) && ARMING_FLAG(ARMED) && osdConfig()->cap_alarm > 0 && getMAhDrawn() >= osdConfig()->cap_alarm) {
         tfp_sprintf(element->buff, "OVER CAP");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_WARNING;
         SET_BLINK(OSD_WARNINGS);
         return;
@@ -1523,6 +1547,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     if (osdWarnGetState(OSD_WARNING_BATTERY_NOT_FULL) && !(ARMING_FLAG(ARMED) || ARMING_FLAG(WAS_EVER_ARMED)) && (getBatteryState() == BATTERY_OK)
           && getBatteryAverageCellVoltage() < batteryConfig()->vbatfullcellvoltage) {
         tfp_sprintf(element->buff, "BATT < FULL");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_INFO;
         return;
     }
@@ -1530,6 +1555,7 @@ static void osdElementWarnings(osdElementParms_t *element)
     // Visual beeper
     if (osdWarnGetState(OSD_WARNING_VISUAL_BEEPER) && osdGetVisualBeeperState()) {
         tfp_sprintf(element->buff, "  * * * *");
+        storeWarningForDji(element->buff);
         element->attr = DISPLAYPORT_ATTR_INFO;
         return;
     }

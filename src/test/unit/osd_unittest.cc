@@ -65,6 +65,8 @@ extern "C" {
     void osdRefresh(timeUs_t currentTimeUs);
     void osdFormatTime(char * buff, osd_timer_precision_e precision, timeUs_t time);
     int osdConvertTemperatureToSelectedUnit(int tempInDegreesCelcius);
+    bool usbCableIsInserted(void) { return false; }
+	bool usbVcpIsConnected(void) { return false; }
 
     uint16_t rssi;
     attitudeEulerAngles_t attitude;
